@@ -14,10 +14,7 @@ class Timer:
             current_time = get_ticks()
             if current_time - self.start_time >= self.duration:
                 self.deactivate()
-        else:      
-            current_time = get_ticks()
-            if current_time - self.start_time >= 1000:
-                    self.activate()
+        
     def activate(self):
         self.active = True
         self.start_time = get_ticks()
