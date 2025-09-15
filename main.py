@@ -5,6 +5,7 @@ import math
 from spawner import *
 from level import Level
 from timer import Timer
+import random
 
 pygame.init()
 
@@ -30,10 +31,14 @@ delta_time = 0.1
 player = Player(WINDOW_WIDTH/2, WINDOW_HEIGHT/1.4, 50, (0, 0), player_jet_image, delta_time)
 
 levels = [
-    Level([Spawner(2, delta_time, player, 1000), Spawner(10, delta_time, player, 2000)]), 
-    Level([Spawner(3, delta_time, player, 100)])
-]
+    Level([[Spawner(10, delta_time, player, 100) ]]),
+    Level([[Spawner(3, delta_time, player, 100, "orby"), Spawner(8, delta_time, player, 5000)], Spawner(20, delta_time, player, 500)]), 
+    # Level([ Spawner(1, delta_time, player, 100, "orby"), Spawner(10, delta_time, player, 500, "orby"), Spawner(100, delta_time, player, 100), Spawner(5, delta_time, player, 600, "orby")]),
+    # Level([ Spawner(10, delta_time, player, 10), Spawner(6, delta_time, player, 1000, "orby")])
 
+
+]
+# levels = [Level([Spawner(2000, delta_time, player, 10)])]
 level_index = 0
 
 # Level transition variables
@@ -43,6 +48,14 @@ level_completed = False
 
 # Track mouse position
 mouse_pos = (0, 0)
+
+backdrop_star_array = []
+star_count = 80
+
+for i in range(star_count):
+    backdrop_star_array.append({"x":random.randint(5, WINDOW_WIDTH),"y":random.randint(5, WINDOW_HEIGHT)})
+
+
 
 while True:
     screen.fill((0, 0, 0))
@@ -61,6 +74,17 @@ while True:
     delta_time = clock.tick(60)
     delta_time = max(0.001, min(0.1, delta_time))
     player.dt = delta_time
+    
+    if len(backdrop_star_array) < star_count:
+        backdrop_star_array.append({"x":random.randint(5, WINDOW_WIDTH),"y":random.randint(5, WINDOW_HEIGHT)})
+
+    for star in backdrop_star_array:
+        if star["y"]<WINDOW_HEIGHT:
+            star["y"]+=1
+            pygame.draw.rect(screen, (255,255,255), (star["x"],star["y"],3,3))
+        else:
+            backdrop_star_array.remove(star)
+            
 
     # Handle level transitions
     if level_index < len(levels):
@@ -88,7 +112,11 @@ while True:
     if level_index < len(levels) and not waiting_for_next_level:
         current_level = levels[level_index]
         for spawner in current_level.spawners:
-            spawner.dt = delta_time
+            if type(spawner) == list:
+                for s in spawner:
+                    s.dt = delta_time
+            else:
+                spawner.dt = delta_time
 
     # Display UI
     fps_text = font.render(f"fps: {clock.get_fps():.2f}", True, (255, 255, 255))

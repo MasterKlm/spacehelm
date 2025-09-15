@@ -1,13 +1,33 @@
 import pygame
 from settings import *
 import math
+from ambient import create_light_surface
+
+def get_average_color(surface):
+    arr = pygame.surfarray.pixels3d(surface)
+    if surface.get_masks()[3] != 0:  # Has alpha
+        alpha = pygame.surfarray.pixels_alpha(surface)
+        mask = alpha > 0
+        if mask.any():
+            r = arr[:,:,0][mask].mean()
+            g = arr[:,:,1][mask].mean()
+            b = arr[:,:,2][mask].mean()
+        else:
+            r = g = b = 0
+    else:
+        r = arr[:,:,0].mean()
+        g = arr[:,:,1].mean()
+        b = arr[:,:,2].mean()
+    return (int(r), int(g), int(b))
 
 class Bullet:
-    def __init__(self, start_x, start_y, end_x, end_y, angle, dt, speed=60, image=None):
+    def __init__(self, start_x, start_y, end_x, end_y, angle, dt, damage,bullet_image,size, speed=60, lightColor=None):
         self.x, self.y = start_x, start_y
         self.start_x = start_x
         self.start_y = start_y
-        
+        self.bullet_image = bullet_image
+        self.damage = damage
+        self.size = size
         # Calculate direction vector
         dx = end_x - start_x
         dy = end_y - start_y
@@ -25,8 +45,17 @@ class Bullet:
         self.speed = speed
         self.dt = dt
         self.alive = True
-        self.image = image
-        self.rect = pygame.Surface((5, 5))
+        # self.rect = pygame.Surface((5, 5))
+        self.surface = bullet_image if bullet_image!=None else pygame.Surface((5, 5))
+        self.mask = pygame.mask.from_surface(self.surface)
+        self.lightRadius = 50
+        
+        if self.bullet_image is not None and lightColor== None:
+            avg_color = get_average_color(self.bullet_image)
+        else:
+            avg_color = lightColor  # fallback
+
+        self.light_surface = create_light_surface(self.lightRadius, avg_color)
         
     def update(self, screen):
         # Check if bullet is outside window bounds
@@ -40,5 +69,12 @@ class Bullet:
             self.render(screen)
     
     def render(self, screen):
-        self.rect.fill((255, 165, 0))
-        screen.blit(self.rect, (self.x, self.y))
+        if self.bullet_image is not None:
+            screen.blit(self.bullet_image, (self.x, self.y))
+            screen.blit(
+                self.light_surface,
+                (self.x + self.size[0] // 2 - self.lightRadius, self.y + self.size[1] // 2 - self.lightRadius),
+                special_flags=pygame.BLEND_RGB_ADD
+            )
+        else:
+            pygame.draw.rect(screen, (255, 165, 0), (self.x, self.y, 5, 5))

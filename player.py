@@ -20,10 +20,12 @@ class Player:
         self.gun_data = {
             "1":{
                 "gun_type":"blaster",
-                "shot_speed": 170
+                "shot_speed": 80,
+                "bullet_size": (30,30),
+                "light":(0,0,200)
             }
         }
-        self.gun = Gun(self.gun_data[str(self.gun_index)], 5, 0, self, 170)
+        self.gun = Gun(self.gun_data[str(self.gun_index)], 0, self, self.gun_data[str(self.gun_index)]["shot_speed"])
 
         
     def update(self, screen):
@@ -31,9 +33,9 @@ class Player:
         self.ray.start_x, self.ray.start_y = self.x+self.image.get_width()/2, self.y
         
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_d]:
+        if keys[pygame.K_d] and self.x < WINDOW_WIDTH-45:
             self.x+=self.speed*self.dt
-        if keys[pygame.K_a]:
+        if keys[pygame.K_a] and self.x > 5:
             self.x-=self.speed*self.dt
         
         
