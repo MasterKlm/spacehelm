@@ -3,6 +3,7 @@ from settings import *
 from enemy import *
 import random
 from timer import Timer
+from spark import Spark
 
 class Spawner:
     # Class-level shared resources to avoid loading multiple times
@@ -52,7 +53,8 @@ class Spawner:
                 "shot_speed":40,
                 "size": (40,40),
                 "bullet_size":(30,30),
-                "light":(200,0,0)
+                "light":(200,0,0),
+                "bullet_image": pygame.transform.scale(pygame.image.load("./assets/blaster_bullet_img.png").convert_alpha(), (30,30)),
 
             },
             "orby":{
@@ -60,9 +62,10 @@ class Spawner:
                 "gun_type":"sweeper",
                 "damage":15,
                 "health":10,
-                "shot_speed":30,
+                "shot_speed":40,
                 "size": (50,50),
                 "bullet_size":(80,80),
+                "bullet_image": pygame.transform.scale(pygame.image.load("./assets/wave_bullet_img.png").convert_alpha(), (80,80)),
                 
             }
         }
@@ -76,7 +79,7 @@ class Spawner:
         self.spawn_count = 0
         self.spawn_timer = Timer(spawn_interval)
         self.spawn_timer.activate()
-        
+        self.sparks = []
         # Cache masks for collision detection
         self.enemy_masks = {}
         for enemy_type, data in self.enemy_database.items():
@@ -88,7 +91,11 @@ class Spawner:
 
     def update(self, screen):
         self.spawn_timer.update()
-        
+        for i, spark in sorted(enumerate(self.sparks), reverse=True):
+            spark.move(1)
+            spark.draw(screen)
+            if not spark.alive:
+                self.sparks.pop(i)
         if not self.done_spawning:
             if not self.spawn_timer.active and self.spawn_count < self.num_enemies:
                 self.spawn(screen)
@@ -123,7 +130,22 @@ class Spawner:
                     # Use cached mask
                     offset = (int(bullet.x - self.player.x), int(bullet.y - self.player.y))
                     if self.player.mask.overlap(bullet.mask, offset):
+                        self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 3))
+                        self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 2))
+                        self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 4))
+                        self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 2))
+                        self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 3))
                         self.player.health -= bullet.damage
+                        if self.player.health <= 0:
+                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 5))
+                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 2))
+                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 165, 0), 4))
+                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 8))
+                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 10))
+                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 4))
+                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 165, 0), 10))
+                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 10))
+                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 165, 0), 7))
                         bullet.alive = False
             
             # Player bullets vs enemy - only check alive bullets
@@ -138,19 +160,40 @@ class Spawner:
                     enemy_mask = self.enemy_masks[self.enemy_type]
                     if enemy_mask.overlap(bullet.mask, offset):
                         enemy.health -= bullet.damage
+                        self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
+                        self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
+                        self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
+                        self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
+                        self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
                         enemy.show_health_bar()  # Show health bar when hit
                         bullet.alive = False
                         
                         if enemy.health <= 0:
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
                             enemy.alive = False
                         break  # Bullet hit, no need to check more bullets
         
     def spawn(self, screen):
         endX = random.randint(10, WINDOW_WIDTH-10)
+        endY = random.randint(10, (WINDOW_HEIGHT/2)-10)
         enemy = Enemy(
             random.randint(10, WINDOW_WIDTH-10),
             random.randint(10, WINDOW_HEIGHT//3),
-            20, self.dt, self.player, endX,
+            20, self.dt, self.player, endX, endY,
             self.enemy_database[self.enemy_type], 
             self.current_enemy_image
         )

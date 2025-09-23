@@ -21,12 +21,13 @@ def get_average_color(surface):
     return (int(r), int(g), int(b))
 
 class Bullet:
-    def __init__(self, start_x, start_y, end_x, end_y, angle, dt, damage,bullet_image,size, speed=60, lightColor=None):
+    def __init__(self, start_x, start_y, end_x, end_y, angle, dt, damage,bullet_image,size, gun_type_name,speed=60, lightColor=None, cachedLightSurface=None ):
         self.x, self.y = start_x, start_y
         self.start_x = start_x
         self.start_y = start_y
         self.bullet_image = bullet_image
         self.damage = damage
+        self.gun_type_name = gun_type_name
         self.size = size
         # Calculate direction vector
         dx = end_x - start_x
@@ -48,14 +49,14 @@ class Bullet:
         # self.rect = pygame.Surface((5, 5))
         self.surface = bullet_image if bullet_image!=None else pygame.Surface((5, 5))
         self.mask = pygame.mask.from_surface(self.surface)
-        self.lightRadius = 50
+        self.lightRadius = int(math.hypot(self.dir_x * self.speed * self.dt, self.dir_y * self.speed * self.dt)) // 2 if gun_type_name == "rail" else round(self.bullet_image.get_width()/0.5) if self.bullet_image is not None else 10
         
         if self.bullet_image is not None and lightColor== None:
             avg_color = get_average_color(self.bullet_image)
         else:
             avg_color = lightColor  # fallback
 
-        self.light_surface = create_light_surface(self.lightRadius, avg_color)
+        self.light_surface = cachedLightSurface if cachedLightSurface!=None else create_light_surface(self.lightRadius, avg_color)
         
     def update(self, screen):
         # Check if bullet is outside window bounds
@@ -77,4 +78,17 @@ class Bullet:
                 special_flags=pygame.BLEND_RGB_ADD
             )
         else:
-            pygame.draw.rect(screen, (255, 165, 0), (self.x, self.y, 5, 5))
+            if self.gun_type_name == "blaster":
+                pygame.draw.rect(screen, (255, 165, 0), (self.x, self.y, 5, 5))
+                screen.blit(
+                self.light_surface,
+                (self.x + self.size[0] // 2 - self.lightRadius, self.y + self.size[1] // 2 - self.lightRadius),
+                special_flags=pygame.BLEND_RGB_ADD
+            )
+            if self.gun_type_name == "rail":
+                pygame.draw.rect(screen, (255,0,0), (self.x, self.y,10, WINDOW_HEIGHT/2))
+                screen.blit(
+                    self.light_surface,
+                    (self.x + self.size[0] // 2 - self.lightRadius, self.y + self.size[1] // 2 - self.lightRadius),
+                    special_flags=pygame.BLEND_RGB_ADD
+                )

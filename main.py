@@ -11,6 +11,7 @@ pygame.init()
 
 font = pygame.font.Font(None, 30)
 
+    # Start in full screen mode
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 clock = pygame.time.Clock()
 
@@ -25,6 +26,7 @@ cursor_rect = cursor_image.get_rect()
 player_jet_image = pygame.image.load('./assets/jet.png').convert_alpha()
 player_jet_image = pygame.transform.scale(player_jet_image, (40, 40))
 pygame.mixer.music.load("./assets/soothing.wav")
+pygame.mixer.music.set_volume(0.2)
 pygame.mixer.music.play(loops=-1)
 
 delta_time = 0.1
@@ -71,7 +73,7 @@ while True:
             if not waiting_for_next_level:
                 player.gun.shoot()
     
-    delta_time = clock.tick(60)
+    delta_time = clock.tick(FPS)
     delta_time = max(0.001, min(0.1, delta_time))
     player.dt = delta_time
     
@@ -127,6 +129,9 @@ while True:
     screen.blit(health_text, (20, WINDOW_HEIGHT - 60))
     screen.blit(level_text, (10, 40))
     
+    gun_index_font = pygame.font.Font(None, 40)
+    gun_index_text = gun_index_font.render(player.gun_data[str(player.gun_index)]["gun_type"], True, (255, 255, 255))
+    screen.blit(gun_index_text, ((WINDOW_WIDTH/2)-30, WINDOW_HEIGHT-80))
     # Game over check
     if player.health < 0:
         game_over_font = pygame.font.Font(None, 60)

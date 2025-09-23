@@ -3,11 +3,11 @@ from settings import *
 from ray import Ray
 import random
 from timer import Timer
-from bullet import Bullet
+from bullet import get_average_color
 from gun import Gun
 
 class Enemy:
-    def __init__(self, x, y, speed, dt, player, endX, enemy_type_data, image):
+    def __init__(self, x, y, speed, dt, player, endX, endY, enemy_type_data, image):
         self.x = x
         self.y = y
         self.dt = dt
@@ -15,13 +15,14 @@ class Enemy:
         self.alive = True
         self.player = player
         self.end_x = endX
+        self.end_y = endY
         self.speed = speed
         self.health = enemy_type_data["health"]
         self.max_health = enemy_type_data["health"]  # Store original health for health bar calculation
         self.keep_moving = True
         self.ray = Ray(self.x-self.image.get_width()/2, self.y+self.image.get_height()/2, self.player.x+self.player.image.get_width()/2, self.player.y, (0,255,0))
         self.gun = Gun(enemy_type_data, 3000, self, enemy_type_data["shot_speed"], True)
-        
+        self.image_average_color = get_average_color(self.image)
         # Health bar properties
         self.show_health_bar_flag = False
         self.health_bar_timer = Timer(2000)  # Show health bar for 2 seconds
@@ -46,16 +47,24 @@ class Enemy:
  
     def move(self):
         if self.keep_moving:
-            diff = self.end_x - self.x
-            if abs(diff) < 50:
+            diff_x = self.end_x - self.x
+            diff_y = self.end_y - self.y
+            distance = math.hypot(diff_x, diff_y)
+            if distance < 50:
                 self.keep_moving = False
                 self.end_x = random.randint(10, WINDOW_WIDTH-10)
+                self.end_y = random.randint(10, WINDOW_HEIGHT//3)
             else:
                 move_speed = self.speed * self.dt
-                if diff > 0:
-                    self.x += move_speed
+                # Normalize direction
+                if distance != 0:
+                    norm_x = diff_x / distance
+                    norm_y = diff_y / distance
                 else:
-                    self.x -= move_speed
+                    norm_x = 1
+                    norm_y = 0
+                self.x += norm_x * move_speed
+                self.y += norm_y * move_speed
         else:
             self.keep_moving = True
 

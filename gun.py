@@ -13,21 +13,26 @@ class Gun:
         self.entity = entity
         self.auto_shoot = auto_shoot
         self.shot_speed = shot_speed
-        
+        self.cached_bullets_light = {}
         # These will be set by the spawner to avoid loading resources multiple times
         self.shared_sounds = None
         self.shared_bullet_images = None
-        
         # Fallback bullet data (only used if shared resources not available)
         self.bullet_data = {
             "blaster": {
-                "image": self.gun_type_data["image"] if "image" in self.gun_type_data else None,  # Will be loaded from shared resources
-                "forward_angle": 200,
+                "image": self.gun_type_data["bullet_image"] if "bullet_image" in self.gun_type_data else None,  # Will be loaded from shared resources
+                "forward_angle": 200 ,
                 "damage":5
             },
             "sweeper": {
-                "image": self.gun_type_data["image"] if "image" in self.gun_type_data else None,  # Will be loaded from shared resources
+                "image": self.gun_type_data["bullet_image"] if "bullet_image" in self.gun_type_data else None,  # Will be loaded from shared resources
                 "forward_angle": 270,
+                "damage":15
+
+            },
+            "rail": {
+                "image":self.gun_type_data["bullet_image"] if "bullet_image" in self.gun_type_data else None, # Will be loaded from shared resources
+                "forward_angle": 180,
                 "damage":15
 
             }
@@ -43,26 +48,22 @@ class Gun:
     
     def get_rotated_bullet_image(self, target_angle):
         """Get bullet image rotated to face the target angle with caching and scaling"""
-        # Use shared resources if available
-        if self.shared_bullet_images and self.gun_type_name in self.shared_bullet_images:
-            bullet_cache = self.shared_bullet_images[self.gun_type_name]
-            original_image = bullet_cache["original"]
-            # Always scale the original image to bullet_size
-            bullet_size = self.gun_type_data["bullet_size"] if "bullet_size" in self.gun_type_data else (30, 30)
-            scaled_image = pygame.transform.scale(original_image, bullet_size)
-            # Create cache key for this rotation (rounded to nearest 5 degrees for efficiency)
-            angle_key = round(math.degrees(target_angle) / 5) * 5
-            # Check if we already have this rotation cached
-            if angle_key in bullet_cache["rotations"]:
-                return bullet_cache["rotations"][angle_key]
-            # Calculate rotation and cache it
+        
+        # Rail gun should not have an image - always return None
+        if self.gun_type_name == "rail":
+            return None
+        
+        # Use shared resources if available, but first check if gun_type_data has bullet_image
+        if self.gun_type_data and "bullet_image" in self.gun_type_data:
+            original_image = self.gun_type_data["bullet_image"]  # Get directly from gun_type_data
+
             forward_angle_rad = math.radians(self.bullet_data[self.gun_type_name]["forward_angle"])
             rotation_needed = target_angle - forward_angle_rad
             rotation_degrees = -math.degrees(rotation_needed)
             # Rotate and cache
-            rotated_image = pygame.transform.rotate(scaled_image, rotation_degrees)
-            bullet_cache["rotations"][angle_key] = rotated_image
+            rotated_image = pygame.transform.rotate(original_image, rotation_degrees)
             return rotated_image
+
         # Fallback to old method if shared resources not available
         return self._get_fallback_bullet_image(target_angle)
     
@@ -79,6 +80,8 @@ class Gun:
                 self.bullet_data[self.gun_type_name]["image"] = pygame.transform.scale(
                     pygame.image.load('./assets/wave_bullet_img.png').convert_alpha(), bullet_size
                 )
+            elif self.gun_type_name == "rail":
+                self.bullet_data[self.gun_type_name]["image"] = None
         original_image = self.bullet_data[self.gun_type_name]["image"]
         if original_image is None:
             return None
@@ -86,11 +89,16 @@ class Gun:
         rotation_needed = target_angle - forward_angle_rad
         rotation_degrees = -math.degrees(rotation_needed)
         # Already scaled, just rotate
+        # from player import Player
+        # if (isinstance(self.entity, Player )):
+        #     print("using fall back image")
+
         return pygame.transform.rotate(original_image, rotation_degrees)
     
     def play_sound(self, gun_type_name):
         """Play gun sound using shared resources if available"""
         if self.shared_sounds and self.gun_type_name in self.shared_sounds:
+            self.shared_sounds[self.gun_type_name].set_volume(0.1)
             self.shared_sounds[self.gun_type_name].play()
         else:
             # Fallback: load sound if not already loaded
@@ -101,9 +109,13 @@ class Gun:
                     self.sounds[self.gun_type_name] = pygame.mixer.Sound("./assets/sweeper.wav")
             
             if self.gun_type_name in self.sounds:
+                self.sounds[self.gun_type_name].set_volume(0.1)
                 self.sounds[self.gun_type_name].play()
     
     def update(self, screen):
+        from player import Player
+        if isinstance(self.entity, Player):
+            self.gun_type_data = self.entity.gun_data[str(self.entity.gun_index)] 
         if self.shot_interval != 0:
             self.shot_timer.update()
             if self.auto_shoot:
@@ -115,6 +127,7 @@ class Gun:
                         self.entity.ray.end_x = self.entity.player.x + self.entity.player.image.get_width()/2
                         self.entity.ray.end_y = self.entity.player.y
                     self.shoot()
+                    
                     self.shot_timer.activate()
         
         # More efficient bullet cleanup
@@ -128,23 +141,31 @@ class Gun:
         
         if self.shot_timer.active == False and self.shot_interval != 0:
             self.play_sound(self.gun_type_name)
-            
             # Get the rotated bullet image for the current ray angle
             bullet_image = self.get_rotated_bullet_image(self.entity.ray.angle)
             
             bullet = Bullet(
                 self.entity.ray.start_x, 
                 self.entity.ray.start_y,
-                self.entity.ray.end_x,
-                self.entity.ray.end_y, 
+                self.entity.ray.end_x if self.gun_type_name!="rail" else self.entity.ray.start_x,
+                self.entity.ray.end_y  if self.gun_type_name!="rail" else self.entity.ray.start_y, 
                 self.entity.ray.angle, 
                 self.entity.dt, 
                 self.bullet_data[self.gun_type_name]["damage"],
                 bullet_image,
                 self.gun_type_data["bullet_size"],
+                self.gun_type_name,
                 self.shot_speed,
-                self.gun_type_data["light"] if "light" in self.gun_type_data else None
+                self.gun_type_data["light"] if "light" in self.gun_type_data else None,
+                self.cached_bullets_light[self.gun_type_name] if self.gun_type_name in self.cached_bullets_light else None,
             )
+            if self.gun_type_name in self.cached_bullets_light:
+                # print("cached light exist")
+                pass
+            else:
+                # print("cached light addded")
+
+                self.cached_bullets_light[self.gun_type_name] = bullet.light_surface
             self.bullets.append(bullet)
             self.shot_timer.activate()
         
@@ -164,9 +185,17 @@ class Gun:
                 self.bullet_data[self.gun_type_name]["damage"],
                 bullet_image,
                 self.gun_type_data["bullet_size"],
+                self.gun_type_name,
                 self.shot_speed,
-                self.gun_type_data["light"] if "light" in self.gun_type_data else None
-
+                self.gun_type_data["light"] if "light" in self.gun_type_data else None,
+                self.cached_bullets_light[self.gun_type_name] if self.gun_type_name in self.cached_bullets_light else None,
             )
+            if self.gun_type_name in self.cached_bullets_light:
+                # print("cached light exist")
+                pass
+            else:
+                # print("cached light addded")
+
+                self.cached_bullets_light[self.gun_type_name] = bullet.light_surface
             self.bullets.append(bullet)
             self.shot_timer.activate()
