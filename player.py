@@ -3,7 +3,7 @@ from settings import *
 from ray import *
 from bullet import Bullet
 from gun import Gun
-
+from timer import Timer
 
 class Player:
     def __init__(self, x, y,speed, mos_pos, image, dt):
@@ -18,21 +18,22 @@ class Player:
         self.mask = pygame.mask.from_surface(self.image)
         self.gun_index = 1
         self.gun_data = {
-            "1":{
-                "gun_type":"blaster",
+            "1": {
+                "gun_type": "blaster",
                 "shot_speed": 80,
-                "bullet_size": (30,30),
-                "shot_interval":0,
-
-                "bullet_image": pygame.transform.scale(pygame.image.load("./assets/blaster_bullet_img.png").convert_alpha(), (30,30)),
-                "light":(0,0,200)
+                "bullet_size": (30, 30),
+                "shot_interval": 0,
+                "bullet_image": pygame.transform.scale(pygame.image.load("./assets/blaster_bullet_img.png").convert_alpha(), (30, 30)),
+                "light": (0, 0, 200),
+                "timer": Timer(0)  # Add individual timer
             },
-            "2":{
-                "gun_type":"rail",
+            "2": {
+                "gun_type": "rail",
                 "shot_speed": 350,
-                "bullet_size": (WINDOW_HEIGHT,200),
-                "shot_interval":5000,
-                "light":(144, 238, 144)
+                "bullet_size": (WINDOW_HEIGHT, 200),
+                "shot_interval": 5000,
+                "light": (144, 238, 144),
+                "timer": Timer(5000)  # Add individual timer
             }
         }
         self.gun = Gun(self.gun_data[str(self.gun_index)], self.gun_data[str(self.gun_index)]["shot_interval"], self, self.gun_data[str(self.gun_index)]["shot_speed"])

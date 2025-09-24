@@ -6,13 +6,17 @@ class Timer:
         self.duration = duration
         self.start_time = 0
         self.active = False
+        self.elapsed_time = 0
     def deactivate(self):
         self.active = False
         self.start_time=0
+        self.elapsed_time = 0
+
     def update(self):
         if self.active:
             current_time = get_ticks()
-            if current_time - self.start_time >= self.duration:
+            self.elapsed_time = current_time - self.start_time
+            if self.elapsed_time >= self.duration:
                 self.deactivate()
         
     def activate(self):

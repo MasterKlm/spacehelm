@@ -14,7 +14,7 @@ class Gun:
         self.entity = entity
         self.auto_shoot = auto_shoot
         self.shot_speed = shot_speed
-        self.cached_bullets_light = {}
+        # self.cached_bullets_light = {}
         # These will be set by the spawner to avoid loading resources multiple times
         self.shared_sounds = None
         self.shared_bullet_images = None
@@ -108,22 +108,39 @@ class Gun:
                     self.sounds[self.gun_type_name] = pygame.mixer.Sound("./assets/laser_pew.wav")
                 elif self.gun_type_name == "sweeper":
                     self.sounds[self.gun_type_name] = pygame.mixer.Sound("./assets/sweeper.wav")
+                elif self.gun_type_name == "rail":
+                    self.sounds[self.gun_type_name] = pygame.mixer.Sound("./assets/rail_sound.wav")
             
             if self.gun_type_name in self.sounds:
                 self.sounds[self.gun_type_name].set_volume(0.1)
                 self.sounds[self.gun_type_name].play()
     
     def update(self, screen):
-        if self.shot_interval != self.last_shot_interval:
-            self.shot_timer = Timer(self.shot_interval)
-            self.last_shot_interval = self.shot_interval
         from player import Player
         if isinstance(self.entity, Player):
             self.gun_type_data = self.entity.gun_data[str(self.entity.gun_index)] 
+            self.shot_timer = self.gun_type_data["timer"]
+        if self.shot_interval != self.last_shot_interval:
+            self.shot_timer = Timer(self.shot_interval)
+            self.last_shot_interval = self.shot_interval
         if self.shot_interval != 0:
             self.shot_timer.update()
+
+            if isinstance(self.entity, Player):
+                #reload icon
+                # print("elapsed time: ", self.shot_timer.elapsed_time)
+
+                start_angle = math.radians(0)
+                # Calculate the proportion of time remaining (1.0 = full, 0.0 = empty)
+                time_remaining_ratio = (self.shot_timer.duration - self.shot_timer.elapsed_time) / max(1, self.shot_timer.duration)
+
+                # Convert to angle (360 degrees = full circle)
+                end_angle = math.radians(360 * time_remaining_ratio)
+                if end_angle != math.radians(360):
+                    pygame.draw.arc(screen, (50, 169, 86), pygame.Rect(self.entity.x+50, self.entity.y,30,30), start_angle, end_angle, 5)
             if self.auto_shoot:
                 if self.shot_timer.active == False:
+                    #update data when the enemy is about to shoot
                     from enemy import Enemy
                     if isinstance(self.entity, Enemy):
                         self.entity.ray.start_x = self.entity.x + self.entity.image.get_width()/2
@@ -141,8 +158,11 @@ class Gun:
             bullet.update(screen)
     
     def shoot(self):
+        import settings
    
-        
+        light_color = self.gun_type_data.get("light", (255, 255, 255))
+        cache_key = f"{self.gun_type_name}_{light_color[0]}_{light_color[1]}_{light_color[2]}"
+    
         if self.shot_timer.active == False and self.shot_interval != 0:
             self.play_sound(self.gun_type_name)
             # Get the rotated bullet image for the current ray angle
@@ -161,17 +181,17 @@ class Gun:
                 self.gun_type_name,
                 self.shot_speed,
                 self.gun_type_data["light"] if "light" in self.gun_type_data else None,
-                self.cached_bullets_light[self.gun_type_name] if self.gun_type_name in self.cached_bullets_light else None,
+                settings.mainResManager.get_key(cache_key),
                 self.bullet_data[self.gun_type_name]["forward_angle"]
                
             )
-            if self.gun_type_name in self.cached_bullets_light:
+            if settings.mainResManager.get_key(cache_key):
                 # print("cached light exist")
                 pass
             else:
                 # print("cached light addded")
 
-                self.cached_bullets_light[self.gun_type_name] = bullet.light_surface
+                settings.mainResManager.set_key(cache_key, bullet.light_surface )
             self.bullets.append(bullet)
             self.shot_timer.activate()
         
@@ -194,16 +214,16 @@ class Gun:
                 self.gun_type_name,
                 self.shot_speed,
                 self.gun_type_data["light"] if "light" in self.gun_type_data else None,
-                self.cached_bullets_light[self.gun_type_name] if self.gun_type_name in self.cached_bullets_light else None,
+                settings.mainResManager.get_key(cache_key),
                 self.bullet_data[self.gun_type_name]["forward_angle"]
       
             )
-            if self.gun_type_name in self.cached_bullets_light:
+            if settings.mainResManager.get_key(cache_key):
                 # print("cached light exist")
                 pass
             else:
                 # print("cached light addded")
 
-                self.cached_bullets_light[self.gun_type_name] = bullet.light_surface
+                settings.mainResManager.set_key(cache_key, bullet.light_surface )
             self.bullets.append(bullet)
             self.shot_timer.activate()
