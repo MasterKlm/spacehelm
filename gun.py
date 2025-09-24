@@ -9,6 +9,7 @@ class Gun:
         self.gun_type_name = gun_type_data["gun_type"]
         self.gun_type_data = gun_type_data
         self.shot_interval = shot_interval
+        self.last_shot_interval = shot_interval
         self.shot_timer = Timer(shot_interval)
         self.entity = entity
         self.auto_shoot = auto_shoot
@@ -32,7 +33,7 @@ class Gun:
             },
             "rail": {
                 "image":self.gun_type_data["bullet_image"] if "bullet_image" in self.gun_type_data else None, # Will be loaded from shared resources
-                "forward_angle": 180,
+                "forward_angle": 300,
                 "damage":15
 
             }
@@ -113,6 +114,9 @@ class Gun:
                 self.sounds[self.gun_type_name].play()
     
     def update(self, screen):
+        if self.shot_interval != self.last_shot_interval:
+            self.shot_timer = Timer(self.shot_interval)
+            self.last_shot_interval = self.shot_interval
         from player import Player
         if isinstance(self.entity, Player):
             self.gun_type_data = self.entity.gun_data[str(self.entity.gun_index)] 
@@ -147,8 +151,8 @@ class Gun:
             bullet = Bullet(
                 self.entity.ray.start_x, 
                 self.entity.ray.start_y,
-                self.entity.ray.end_x if self.gun_type_name!="rail" else self.entity.ray.start_x,
-                self.entity.ray.end_y  if self.gun_type_name!="rail" else self.entity.ray.start_y, 
+                self.entity.ray.end_x,
+                self.entity.ray.end_y, 
                 self.entity.ray.angle, 
                 self.entity.dt, 
                 self.bullet_data[self.gun_type_name]["damage"],
@@ -158,6 +162,8 @@ class Gun:
                 self.shot_speed,
                 self.gun_type_data["light"] if "light" in self.gun_type_data else None,
                 self.cached_bullets_light[self.gun_type_name] if self.gun_type_name in self.cached_bullets_light else None,
+                self.bullet_data[self.gun_type_name]["forward_angle"]
+               
             )
             if self.gun_type_name in self.cached_bullets_light:
                 # print("cached light exist")
@@ -189,6 +195,8 @@ class Gun:
                 self.shot_speed,
                 self.gun_type_data["light"] if "light" in self.gun_type_data else None,
                 self.cached_bullets_light[self.gun_type_name] if self.gun_type_name in self.cached_bullets_light else None,
+                self.bullet_data[self.gun_type_name]["forward_angle"]
+      
             )
             if self.gun_type_name in self.cached_bullets_light:
                 # print("cached light exist")

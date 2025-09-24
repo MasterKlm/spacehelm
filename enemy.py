@@ -28,6 +28,7 @@ class Enemy:
         self.health_bar_timer = Timer(2000)  # Show health bar for 2 seconds
         self.health_bar_width = 40
         self.health_bar_height = 6
+        self.rect = self.image.get_rect(topleft=(self.x, self.y))
 
     def show_health_bar(self):
         """Activate the health bar display when enemy is hit"""
@@ -36,6 +37,7 @@ class Enemy:
 
     def update(self, screen):
         self.move()
+        self.rect = self.image.get_rect(topleft=(self.x, self.y))
         self.render(screen)
         self.gun.update(screen)
         

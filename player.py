@@ -22,24 +22,28 @@ class Player:
                 "gun_type":"blaster",
                 "shot_speed": 80,
                 "bullet_size": (30,30),
+                "shot_interval":0,
+
                 "bullet_image": pygame.transform.scale(pygame.image.load("./assets/blaster_bullet_img.png").convert_alpha(), (30,30)),
                 "light":(0,0,200)
             },
             "2":{
                 "gun_type":"rail",
-                "shot_speed": 200,
+                "shot_speed": 350,
                 "bullet_size": (WINDOW_HEIGHT,200),
-   
-                "light":(255,0,0)
+                "shot_interval":5000,
+                "light":(144, 238, 144)
             }
         }
-        self.gun = Gun(self.gun_data[str(self.gun_index)], 0, self, self.gun_data[str(self.gun_index)]["shot_speed"])
+        self.gun = Gun(self.gun_data[str(self.gun_index)], self.gun_data[str(self.gun_index)]["shot_interval"], self, self.gun_data[str(self.gun_index)]["shot_speed"])
 
         
     def update(self, screen):
 
         self.gun.gun_type_data = self.gun_data[str(self.gun_index)]
         self.gun.gun_type_name = self.gun_data[str(self.gun_index)]["gun_type"]
+        self.gun.shot_speed = self.gun_data[str(self.gun_index)]["shot_speed"]
+        self.gun.shot_interval = self.gun_data[str(self.gun_index)]["shot_interval"]
         # print("Player Gun name: ", self.gun.gun_type_name)
         self.ray.end_x, self.ray.end_y = self.mos_pos[0],self.mos_pos[1]
         self.ray.start_x, self.ray.start_y = self.x+self.image.get_width()/2, self.y

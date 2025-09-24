@@ -21,7 +21,7 @@ def get_average_color(surface):
     return (int(r), int(g), int(b))
 
 class Bullet:
-    def __init__(self, start_x, start_y, end_x, end_y, angle, dt, damage,bullet_image,size, gun_type_name,speed=60, lightColor=None, cachedLightSurface=None ):
+    def __init__(self, start_x, start_y, end_x, end_y, angle, dt, damage,bullet_image,size, gun_type_name,speed=60, lightColor=None, cachedLightSurface=None, rectForwardAngle=None, ):
         self.x, self.y = start_x, start_y
         self.start_x = start_x
         self.start_y = start_y
@@ -29,6 +29,9 @@ class Bullet:
         self.damage = damage
         self.gun_type_name = gun_type_name
         self.size = size
+        self.rectForwardAngle = rectForwardAngle
+        self.lightColor = lightColor
+
         # Calculate direction vector
         dx = end_x - start_x
         dy = end_y - start_y
@@ -47,8 +50,9 @@ class Bullet:
         self.dt = dt
         self.alive = True
         # self.rect = pygame.Surface((5, 5))
-        self.surface = bullet_image if bullet_image!=None else pygame.Surface((5, 5))
+        self.surface = bullet_image if bullet_image!=None else pygame.Surface((5, 5)) if self.gun_type_name != "rail" else pygame.Surface((10, WINDOW_HEIGHT), pygame.SRCALPHA)
         self.mask = pygame.mask.from_surface(self.surface)
+        self.rect = None
         self.lightRadius = int(math.hypot(self.dir_x * self.speed * self.dt, self.dir_y * self.speed * self.dt)) // 2 if gun_type_name == "rail" else round(self.bullet_image.get_width()/0.5) if self.bullet_image is not None else 10
         
         if self.bullet_image is not None and lightColor== None:
@@ -81,14 +85,37 @@ class Bullet:
             if self.gun_type_name == "blaster":
                 pygame.draw.rect(screen, (255, 165, 0), (self.x, self.y, 5, 5))
                 screen.blit(
-                self.light_surface,
-                (self.x + self.size[0] // 2 - self.lightRadius, self.y + self.size[1] // 2 - self.lightRadius),
-                special_flags=pygame.BLEND_RGB_ADD
-            )
-            if self.gun_type_name == "rail":
-                pygame.draw.rect(screen, (255,0,0), (self.x, self.y,10, WINDOW_HEIGHT/2))
-                screen.blit(
                     self.light_surface,
                     (self.x + self.size[0] // 2 - self.lightRadius, self.y + self.size[1] // 2 - self.lightRadius),
                     special_flags=pygame.BLEND_RGB_ADD
                 )
+            if self.gun_type_name == "rail":
+                # Draw the red rect on a fresh surface each frame, then rotate and blit
+                base_surface = pygame.Surface((10, 200), pygame.SRCALPHA)
+                # self.lightRadius = base_surface.get_width() *4
+                # self.light_surface = create_light_surface(self.lightRadius, self.lightColor)
+                pygame.draw.rect(base_surface, (0, 255,0), base_surface.get_rect())
+                # Draw the circle at the center-top of the base_surface
+                pygame.draw.rect(base_surface, (0, 0, 0), pygame.Rect(0, 0, 10,4))
+                pygame.draw.circle(base_surface, (0, 255,0), (base_surface.get_width() // 2, 5), 5,0,True, True)
+                
+
+                #inner circle post processing effect:
+                pygame.draw.rect(base_surface, (144, 238, 144), base_surface.get_rect().inflate(-4,-4))
+                # Draw the circle at the center-top of the base_surface
+                # pygame.draw.rect(base_surface, (0, 0, 0), pygame.Rect(0, 0, 10,4))
+                pygame.draw.circle(base_surface, (144, 238, 144), (base_surface.get_width() // 2, 5), 1,0,True, True)
+
+
+                rotation_degrees = -math.degrees(self.angle-self.rectForwardAngle)
+                rotated_surface = pygame.transform.rotate(base_surface, rotation_degrees)
+                rotated_rect = rotated_surface.get_rect(center=(self.x, self.y))
+                self.surface = rotated_surface
+                self.rect = rotated_surface.get_rect(topleft=(self.x,self.y))
+                screen.blit(rotated_surface, rotated_rect.topleft)
+                # screen.blit(
+                #     self.light_surface,
+                #     (rotated_rect.topleft[0] + base_surface.get_width() // 2 - self.lightRadius, rotated_rect.topleft[1] + base_surface.get_height() // 2 - self.lightRadius),
+                #     special_flags=pygame.BLEND_RGB_ADD
+                # )
+
