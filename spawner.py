@@ -49,8 +49,10 @@ class Spawner:
                 "image": pygame.image.load("./assets/ufo.png").convert_alpha(),
                 "gun_type":"blaster",
                 "damage":5,
+                "name": "ufo",
                 "health":5,
-                "shot_speed":40,
+                "speed":2,
+                "shot_speed":30,
                 "size": (40,40),
                 "bullet_size":(30,30),
                 "light":(200,0,0),
@@ -62,10 +64,28 @@ class Spawner:
                 "gun_type":"sweeper",
                 "damage":15,
                 "health":10,
+                "speed":1,
                 "shot_speed":40,
+                "name": "orby",
                 "size": (50,50),
                 "bullet_size":(80,80),
-                "bullet_image": pygame.transform.scale(pygame.image.load("./assets/wave_bullet_img.png").convert_alpha(), (80,80)),
+                "bullet_image": pygame.transform.smoothscale(pygame.image.load("./assets/wave_bullet_img.png").convert_alpha(), (80,80)),
+                "light":(255,165,0),
+                
+            },
+            "orbyprime":{
+                "image": pygame.image.load("./assets/orbyprimephase1.png").convert_alpha(),
+                "gun_type":"sweeper",
+                "damage":20,
+                "health":200,
+                "shot_speed":40,
+                "speed":2.5,
+                "name": "orbyprime",
+                "size": (150,150),
+                "bullet_size":(50,50),
+                "enemy_aura": True,
+                "bullet_image": pygame.transform.smoothscale(pygame.image.load("./assets/wave_bullet_img.png").convert_alpha(), (50,50)),
+                "light":(255,165,0),
                 
             }
         }
@@ -185,7 +205,7 @@ class Spawner:
                 else:
                     dx = abs(bullet.x - enemy.x)
                     dy = abs(bullet.y - enemy.y)
-                    if dx < 35 and dy < 35:  # Tighter bounds
+                    if (dx < 35 if bullet.gun_type_name != "sweeper" else 200 ) and ( dy < 35 if bullet.gun_type_name != "sweeper" else 200):  # Tighter bounds
                         # Use cached mask
                         offset = (int(bullet.x - enemy.x), int(bullet.y - enemy.y))
                         enemy_mask = self.enemy_masks[self.enemy_type]
@@ -197,8 +217,11 @@ class Spawner:
                             self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
                             self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
                             enemy.show_health_bar()  # Show health bar when hit
-                            bullet.alive = False
-                            
+                            if bullet.penetration == 0 or bullet.hit_count == bullet.penetration:
+                                bullet.alive = False
+                            else:
+                                bullet.hit_count+=1
+
                             if enemy.health <= 0:
                                 self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
                                 self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
@@ -224,10 +247,12 @@ class Spawner:
         enemy = Enemy(
             random.randint(10, WINDOW_WIDTH-10),
             random.randint(10, WINDOW_HEIGHT//3),
-            20, self.dt, self.player, endX, endY,
+            20, self.dt*self.enemy_database[self.enemy_type]["speed"], self.player, endX, endY,
             self.enemy_database[self.enemy_type], 
             self.current_enemy_image
         )
+
+        # settings.spacialGrid.addClient(enemy.grid_id, enemy.x, enemy.y)
         
         # Pass shared resources to avoid reloading
         enemy.gun.shared_sounds = self._shared_sounds

@@ -7,11 +7,14 @@ from level import Level
 from timer import Timer
 import random
 from resourcemanager import ResourceManager
+from spacialgrid import SpatialGrid
+
 pygame.init()
 
 font = pygame.font.Font(None, 30)
 
 settings.mainResManager = ResourceManager()
+settings.spacialGrid = SpatialGrid(100)
     # Start in full screen mode
 screen = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
 clock = pygame.time.Clock()
@@ -34,8 +37,10 @@ delta_time = 0.1
 player = Player(settings.WINDOW_WIDTH/2, settings.WINDOW_HEIGHT/1.4, 50, (0, 0), player_jet_image, delta_time)
 
 levels = [
-    Level([[Spawner(20, delta_time, player, 100, "orby")]]),
-    Level([[Spawner(10, delta_time, player, 80)]]),
+    # Level([[Spawner(1,delta_time, player, 100, "orbyprime")]]),
+
+    Level([[Spawner(5, delta_time, player, 100)]]),
+    Level([[Spawner(10, delta_time, player, 80), Spawner(3, delta_time, player, 200, "orby")]]),
     Level([[Spawner(8, delta_time, player, 100, "orby"), Spawner(12, delta_time, player, 120)]]),
     Level([[Spawner(15, delta_time, player, 70), Spawner(5, delta_time, player, 500, "orby")]]),
     Level([[Spawner(20, delta_time, player, 60), Spawner(10, delta_time, player, 400, "orby")]]),
@@ -43,7 +48,7 @@ levels = [
     Level([[Spawner(30, delta_time, player, 45), Spawner(20, delta_time, player, 300, "orby")]]),
     Level([[Spawner(35, delta_time, player, 40), Spawner(25, delta_time, player, 250, "orby")]]),
     Level([[Spawner(40, delta_time, player, 35), Spawner(30, delta_time, player, 200, "orby")]]),
-    Level([[Spawner(50, delta_time, player, 30), Spawner(40, delta_time, player, 150, "orby")]])
+    # Level([[Spawner(50, delta_time, player, 30), Spawner(40, delta_time, player, 150, "orby")]])
 ]
 # levels = [Level([Spawner(2000, delta_time, player, 10)])]
 level_index = 0

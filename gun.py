@@ -164,6 +164,8 @@ class Gun:
         cache_key = f"{self.gun_type_name}_{light_color[0]}_{light_color[1]}_{light_color[2]}"
     
         if self.shot_timer.active == False and self.shot_interval != 0:
+            from player import Player
+
             self.play_sound(self.gun_type_name)
             # Get the rotated bullet image for the current ray angle
             bullet_image = self.get_rotated_bullet_image(self.entity.ray.angle)
@@ -179,6 +181,7 @@ class Gun:
                 bullet_image,
                 self.gun_type_data["bullet_size"],
                 self.gun_type_name,
+                self.gun_type_data["penetration"] if isinstance(self.entity, Player) else 0,
                 self.shot_speed,
                 self.gun_type_data["light"] if "light" in self.gun_type_data else None,
                 settings.mainResManager.get_key(cache_key),
@@ -196,6 +199,7 @@ class Gun:
             self.shot_timer.activate()
         
         if self.shot_interval == 0:
+            from player import Player
             self.play_sound(self.gun_type_name)
             
             # Get the rotated bullet image for the current ray angle
@@ -212,6 +216,7 @@ class Gun:
                 bullet_image,
                 self.gun_type_data["bullet_size"],
                 self.gun_type_name,
+                self.gun_type_data["penetration"] if isinstance(self.entity, Player) else 0,
                 self.shot_speed,
                 self.gun_type_data["light"] if "light" in self.gun_type_data else None,
                 settings.mainResManager.get_key(cache_key),

@@ -1,27 +1,12 @@
 import pygame
-from settings import *
+import settings
 import math
 from ambient import create_light_surface
-
-def get_average_color(surface):
-    arr = pygame.surfarray.pixels3d(surface)
-    if surface.get_masks()[3] != 0:  # Has alpha
-        alpha = pygame.surfarray.pixels_alpha(surface)
-        mask = alpha > 0
-        if mask.any():
-            r = arr[:,:,0][mask].mean()
-            g = arr[:,:,1][mask].mean()
-            b = arr[:,:,2][mask].mean()
-        else:
-            r = g = b = 0
-    else:
-        r = arr[:,:,0].mean()
-        g = arr[:,:,1].mean()
-        b = arr[:,:,2].mean()
-    return (int(r), int(g), int(b))
+import helpers
+import random
 
 class Bullet:
-    def __init__(self, start_x, start_y, end_x, end_y, angle, dt, damage,bullet_image,size, gun_type_name,speed=60, lightColor=None, cachedLightSurface=None, rectForwardAngle=None, ):
+    def __init__(self, start_x, start_y, end_x, end_y, angle, dt, damage,bullet_image,size, gun_type_name,penetration=0, speed=60, lightColor=None, cachedLightSurface=None, rectForwardAngle=None, ):
         self.x, self.y = start_x, start_y
         self.start_x = start_x
         self.start_y = start_y
@@ -31,6 +16,11 @@ class Bullet:
         self.size = size
         self.rectForwardAngle = rectForwardAngle
         self.lightColor = lightColor
+        self.penetration = penetration
+        self.hit_count = 0
+        self.grid_id = random.randint(1,10**8)
+        # settings.spacialGrid.addClient(self.grid_id, start_x, start_y)
+
 
         # Calculate direction vector
         dx = end_x - start_x
@@ -50,13 +40,13 @@ class Bullet:
         self.dt = dt
         self.alive = True
         # self.rect = pygame.Surface((5, 5))
-        self.surface = bullet_image if bullet_image!=None else pygame.Surface((5, 5)) if self.gun_type_name != "rail" else pygame.Surface((10, WINDOW_HEIGHT), pygame.SRCALPHA)
+        self.surface = bullet_image if bullet_image!=None else pygame.Surface((5, 5)) if self.gun_type_name != "rail" else pygame.Surface((10, settings.WINDOW_HEIGHT), pygame.SRCALPHA)
         self.mask = pygame.mask.from_surface(self.surface)
         self.rect = None
-        self.lightRadius = int(math.hypot(self.dir_x * self.speed * self.dt, self.dir_y * self.speed * self.dt)) // 2 if gun_type_name == "rail" else round(self.bullet_image.get_width()/0.5) if self.bullet_image is not None else 10
+        self.lightRadius = int(math.hypot(self.dir_x * self.speed * self.dt, self.dir_y * self.speed * self.dt)) // 2 if gun_type_name == "rail" else round(self.bullet_image.get_width()/0.5)
         
         if self.bullet_image is not None and lightColor== None:
-            avg_color = get_average_color(self.bullet_image)
+            avg_color = helpers.get_average_color(self.bullet_image)
         else:
             avg_color = lightColor  # fallback
 
@@ -64,11 +54,12 @@ class Bullet:
         
     def update(self, screen):
         # Check if bullet is outside window bounds
-        if self.x > WINDOW_WIDTH or self.x < 0 or self.y < 0 or self.y > WINDOW_HEIGHT:
+        if ((self.x + self.bullet_image.get_width() if self.bullet_image != None else 0) > settings.WINDOW_WIDTH+100) or (self.x < 0) or (self.y < 0) or (self.y+self.bullet_image.get_height() if self.bullet_image != None else 0) > settings.WINDOW_HEIGHT+150:
             self.alive = False
             
         if self.alive:
             # Move bullet in the calculated direction
+            # settings.spacialGrid.moveClient(self.grid_id, self.x, self.y, self.x + self.dir_x * self.speed * self.dt, self.y + self.dir_y * self.speed * self.dt)
             self.x += self.dir_x * self.speed * self.dt
             self.y += self.dir_y * self.speed * self.dt
             self.render(screen)

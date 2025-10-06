@@ -8,4 +8,4 @@ class ResourceManager:
         if key in self.database:
             return self.database[str(key)]
         else:
-            return None;
+            return None
