@@ -11,7 +11,7 @@ from spacialgrid import SpatialGrid
 
 pygame.init()
 
-font = pygame.font.Font(None, 30)
+font = pygame.font.Font("./assets/fonts/PixelifySans-Regular.ttf", 30)
 
 settings.mainResManager = ResourceManager()
 settings.spacialGrid = SpatialGrid(100)
@@ -23,13 +23,13 @@ clock = pygame.time.Clock()
 pygame.mouse.set_visible(False)
 
 # Load and setup custom cursor
-cursor_image = pygame.image.load('./assets/crosshair.png').convert_alpha()  # Replace with your cursor image
+cursor_image = pygame.image.load('./assets/images/crosshair.png').convert_alpha()  # Replace with your cursor image
 cursor_image = pygame.transform.scale(cursor_image, (100, 100))  # Adjust size as needed
 cursor_rect = cursor_image.get_rect()
 
-player_jet_image = pygame.image.load('./assets/jet.png').convert_alpha()
+player_jet_image = pygame.image.load('./assets/images/jet.png').convert_alpha()
 player_jet_image = pygame.transform.scale(player_jet_image, (40, 40))
-pygame.mixer.music.load("./assets/soothing.wav")
+pygame.mixer.music.load("./assets/sounds/soothing.wav")
 pygame.mixer.music.set_volume(0.2)
 pygame.mixer.music.play(loops=-1)
 
@@ -37,7 +37,6 @@ delta_time = 0.1
 player = Player(settings.WINDOW_WIDTH/2, settings.WINDOW_HEIGHT/1.4, 50, (0, 0), player_jet_image, delta_time)
 
 levels = [
-    # Level([[Spawner(1,delta_time, player, 100, "orbyprime")]]),
 
     Level([[Spawner(5, delta_time, player, 100)]]),
     Level([[Spawner(10, delta_time, player, 80), Spawner(3, delta_time, player, 200, "orby")]]),
@@ -48,7 +47,8 @@ levels = [
     Level([[Spawner(30, delta_time, player, 45), Spawner(20, delta_time, player, 300, "orby")]]),
     Level([[Spawner(35, delta_time, player, 40), Spawner(25, delta_time, player, 250, "orby")]]),
     Level([[Spawner(40, delta_time, player, 35), Spawner(30, delta_time, player, 200, "orby")]]),
-    # Level([[Spawner(50, delta_time, player, 30), Spawner(40, delta_time, player, 150, "orby")]])
+    Level([[Spawner(50, delta_time, player, 30), Spawner(40, delta_time, player, 150, "orby")]]),
+    Level([[Spawner(1,delta_time, player, 100, "orbyprime")]]),
 ]
 # levels = [Level([Spawner(2000, delta_time, player, 10)])]
 level_index = 0
@@ -82,6 +82,30 @@ while True:
             # Only allow shooting if not in transition
             if not waiting_for_next_level:
                 player.gun.shoot()
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+        
+            if not waiting_for_next_level and player.teleporter_timer.active == False:
+                # print("clicked")
+                mouse_pos = event.pos
+                # player.mos_pos = mouse_pos
+                player.x = mouse_pos[0]
+                player.y = mouse_pos[1]
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6),(173, 216, 230), 2))
+                player.sparks.append(Spark([player.x, player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (173, 216, 230), 2))
+                player.teleporter_timer.activate()
     
     delta_time = clock.tick(settings.FPS)
     delta_time = max(0.001, min(0.1, delta_time))
@@ -136,36 +160,39 @@ while True:
     level_text = font.render(f"Level: {level_index + 1}", True, (255, 255, 255))
 
     screen.blit(fps_text, (10, 10))
-    screen.blit(health_text, (20, settings.WINDOW_HEIGHT - 60))
+    screen.blit(health_text, (20, settings.WINDOW_HEIGHT - 80))
     screen.blit(level_text, (10, 40))
     
-    gun_index_font = pygame.font.Font(None, 40)
-    gun_index_text = gun_index_font.render(player.gun_data[str(player.gun_index)]["gun_type"], True, (255, 255, 255))
+    gun_index_font = pygame.font.Font("./assets/fonts/PixelifySans-Regular.ttf", 40)
+    gun_index_text = gun_index_font.render(player.gun_data[str(player.gun_index)]["gun_type"], True, player.gun_data[str(player.gun_index)]["gun_type_text_color"])
     screen.blit(gun_index_text, ((settings.WINDOW_WIDTH/2)-30, settings.WINDOW_HEIGHT-80))
     # Game over check
     if player.health < 0:
-        game_over_font = pygame.font.Font(None, 60)
+        game_over_font = pygame.font.Font("./assets/fonts/PixelifySans-Regular.ttf", 60)
         game_over_text = game_over_font.render("Game Over", True, (255, 0, 0))
         screen.blit(game_over_text, (settings.WINDOW_WIDTH/2.8, settings.WINDOW_HEIGHT/2))
     
     # All levels completed
     elif level_index >= len(levels):
-        victory_font = pygame.font.Font(None, 60)
+        victory_font = pygame.font.Font("./assets/fonts/PixelifySans-Regular.ttf", 60)
         victory_text = victory_font.render("Victory! All Levels Complete!", True, (0, 255, 0))
-        screen.blit(victory_text, (settings.WINDOW_WIDTH/2 - 300, settings.WINDOW_HEIGHT/2))
+        victory_rect = victory_text.get_rect(center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT // 2))
+        screen.blit(victory_text, victory_rect)
     
     # Level transition screen
     elif waiting_for_next_level:
-        transition_font = pygame.font.Font(None, 50)
+        transition_font = pygame.font.Font("./assets/fonts/PixelifySans-Regular.ttf", 50)
         next_level_text = transition_font.render(f"Level {level_index + 1} Complete!", True, (255, 255, 0))
-        
+        next_level_rect = next_level_text.get_rect(center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT // 2 - 40))
+
         # Calculate remaining time
         remaining_time = max(0, (level_transition_timer.duration - (pygame.time.get_ticks() - level_transition_timer.start_time)) / 1000)
         countdown_text = font.render(f"Next level in: {remaining_time:.1f}s", True, (255, 255, 255))
-        
-        screen.blit(next_level_text, (settings.WINDOW_WIDTH/2 - 100, settings.WINDOW_HEIGHT/2 - 50))
-        screen.blit(countdown_text, (settings.WINDOW_WIDTH/2 - 100, settings.WINDOW_HEIGHT/2 + 20))
-        
+        countdown_rect = countdown_text.get_rect(center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT // 2 + 30))
+
+        screen.blit(next_level_text, next_level_rect)
+        screen.blit(countdown_text, countdown_rect)
+
         # Still update player but don't update level
         player.update(screen)
     

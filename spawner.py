@@ -15,22 +15,22 @@ class Spawner:
         """Initialize shared resources once for all spawners"""
         if cls._shared_sounds is None:
             cls._shared_sounds = {
-                "blaster": pygame.mixer.Sound("./assets/laser_pew.wav"),
-                "sweeper": pygame.mixer.Sound("./assets/sweeper.wav")
+                "blaster": pygame.mixer.Sound("./assets/sounds/laser_pew.wav"),
+                "sweeper": pygame.mixer.Sound("./assets/sounds/sweeper.wav")
             }
         
         if cls._shared_bullet_images is None:
             cls._shared_bullet_images = {
                 "blaster": {
                     "original": pygame.transform.scale(
-                        pygame.image.load('./assets/blaster_bullet_img.png').convert_alpha(), 
+                        pygame.image.load('./assets/images/blaster_bullet_img.png').convert_alpha(), 
                         (10,10)
                     ),
                     "rotations": {}  # Cache for rotated versions
                 },
                 "sweeper": {
                     "original": pygame.transform.scale(
-                        pygame.image.load('./assets/wave_bullet_img.png').convert_alpha(), 
+                        pygame.image.load('./assets/images/wave_bullet_img.png').convert_alpha(), 
                         (60,60)
                     ),
                     "rotations": {}  # Cache for rotated versions
@@ -46,21 +46,21 @@ class Spawner:
         self.enemies = []
         self.enemy_database = {
             "ufo":{
-                "image": pygame.image.load("./assets/ufo.png").convert_alpha(),
+                "image": pygame.image.load("./assets/images/ufo.png").convert_alpha(),
                 "gun_type":"blaster",
                 "damage":5,
                 "name": "ufo",
                 "health":5,
-                "speed":2,
+                "speed":1.2,
                 "shot_speed":30,
                 "size": (40,40),
                 "bullet_size":(30,30),
                 "light":(200,0,0),
-                "bullet_image": pygame.transform.scale(pygame.image.load("./assets/blaster_bullet_img.png").convert_alpha(), (30,30)),
+                "bullet_image": pygame.transform.scale(pygame.image.load("./assets/images/blaster_bullet_img.png").convert_alpha(), (30,30)),
 
             },
             "orby":{
-                "image": pygame.image.load("./assets/orby.png").convert_alpha(),
+                "image": pygame.image.load("./assets/images/orby.png").convert_alpha(),
                 "gun_type":"sweeper",
                 "damage":15,
                 "health":10,
@@ -69,22 +69,22 @@ class Spawner:
                 "name": "orby",
                 "size": (50,50),
                 "bullet_size":(80,80),
-                "bullet_image": pygame.transform.smoothscale(pygame.image.load("./assets/wave_bullet_img.png").convert_alpha(), (80,80)),
+                "bullet_image": pygame.transform.smoothscale(pygame.image.load("./assets/images/wave_bullet_img.png").convert_alpha(), (80,80)),
                 "light":(255,165,0),
                 
             },
             "orbyprime":{
-                "image": pygame.image.load("./assets/orbyprimephase1.png").convert_alpha(),
+                "image": pygame.image.load("./assets/images/orbyprimephase1.png").convert_alpha(),
                 "gun_type":"sweeper",
                 "damage":20,
-                "health":200,
-                "shot_speed":40,
-                "speed":2.5,
+                "health":400,
+                "shot_speed":42,
+                "speed":2.6,
                 "name": "orbyprime",
                 "size": (150,150),
                 "bullet_size":(50,50),
                 "enemy_aura": True,
-                "bullet_image": pygame.transform.smoothscale(pygame.image.load("./assets/wave_bullet_img.png").convert_alpha(), (50,50)),
+                "bullet_image": pygame.transform.smoothscale(pygame.image.load("./assets/images/wave_bullet_img.png").convert_alpha(), (50,50)),
                 "light":(255,165,0),
                 
             }
@@ -205,7 +205,7 @@ class Spawner:
                 else:
                     dx = abs(bullet.x - enemy.x)
                     dy = abs(bullet.y - enemy.y)
-                    if (dx < 35 if bullet.gun_type_name != "sweeper" else 200 ) and ( dy < 35 if bullet.gun_type_name != "sweeper" else 200):  # Tighter bounds
+                    if (dx < 200 if bullet.gun_type_name != "sweeper" else 200 ) and ( dy < 35 if bullet.gun_type_name != "sweeper" else 200):  # Tighter bounds
                         # Use cached mask
                         offset = (int(bullet.x - enemy.x), int(bullet.y - enemy.y))
                         enemy_mask = self.enemy_masks[self.enemy_type]

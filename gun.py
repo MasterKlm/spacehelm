@@ -75,11 +75,11 @@ class Gun:
             bullet_size = self.gun_type_data["bullet_size"] if "bullet_size" in self.gun_type_data else (30, 30)
             if self.gun_type_name == "blaster":
                 self.bullet_data[self.gun_type_name]["image"] = pygame.transform.scale(
-                    pygame.image.load('./assets/blaster_bullet_img.png').convert_alpha(), bullet_size
+                    pygame.image.load('./assets/images/blaster_bullet_img.png').convert_alpha(), bullet_size
                 )
             elif self.gun_type_name == "sweeper":
                 self.bullet_data[self.gun_type_name]["image"] = pygame.transform.scale(
-                    pygame.image.load('./assets/wave_bullet_img.png').convert_alpha(), bullet_size
+                    pygame.image.load('./assets/images/wave_bullet_img.png').convert_alpha(), bullet_size
                 )
             elif self.gun_type_name == "rail":
                 self.bullet_data[self.gun_type_name]["image"] = None
@@ -105,11 +105,11 @@ class Gun:
             # Fallback: load sound if not already loaded
             if self.gun_type_name not in self.sounds:
                 if self.gun_type_name == "blaster":
-                    self.sounds[self.gun_type_name] = pygame.mixer.Sound("./assets/laser_pew.wav")
+                    self.sounds[self.gun_type_name] = pygame.mixer.Sound("./assets/sounds/laser_pew.wav")
                 elif self.gun_type_name == "sweeper":
-                    self.sounds[self.gun_type_name] = pygame.mixer.Sound("./assets/sweeper.wav")
+                    self.sounds[self.gun_type_name] = pygame.mixer.Sound("./assets/sounds/sweeper.wav")
                 elif self.gun_type_name == "rail":
-                    self.sounds[self.gun_type_name] = pygame.mixer.Sound("./assets/rail_sound.wav")
+                    self.sounds[self.gun_type_name] = pygame.mixer.Sound("./assets/sounds/rail_sound.wav")
             
             if self.gun_type_name in self.sounds:
                 self.sounds[self.gun_type_name].set_volume(0.1)

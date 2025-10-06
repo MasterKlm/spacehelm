@@ -21,7 +21,8 @@ class Player:
         self.mask = pygame.mask.from_surface(self.image)
         self.gun_index = 1
         # settings.spacialGrid.addClient(self.grid_id, x,y)
-
+        self.sparks = []
+        self.teleporter_timer = Timer(3000) 
         self.gun_data = {
             "1": {
                 "gun_type": "blaster",
@@ -29,8 +30,9 @@ class Player:
                 "bullet_size": (30, 30),
                 "shot_interval": 0,
                 "penetration":0,
-                "bullet_image": pygame.transform.smoothscale(pygame.image.load("./assets/blaster_bullet_img.png").convert_alpha(), (30, 30)),
+                "bullet_image": pygame.transform.smoothscale(pygame.image.load("./assets/images/blaster_bullet_img.png").convert_alpha(), (30, 30)),
                 "light": (0, 0, 200),
+                "gun_type_text_color":(0,0,200),
                 "timer": Timer(0)  # Add individual timer
             },
             "2": {
@@ -40,6 +42,7 @@ class Player:
                 "shot_interval": 5000,
                 "penetration":0,
                 "light": (144, 238, 144),
+                "gun_type_text_color":(0,200,0),
                 "timer": Timer(5000)  # Add individual timer
             },
             "3": {
@@ -47,16 +50,35 @@ class Player:
                 "shot_speed": 90,
                 "bullet_size": (150, 150),
                 "penetration":5,
-                "bullet_image": pygame.transform.smoothscale(pygame.image.load("./assets/wave_bullet_img2.png").convert_alpha(), (150, 150)),
+                "bullet_image": pygame.transform.smoothscale(pygame.image.load("./assets/images/wave_bullet_img2.png").convert_alpha(), (150, 150)),
                 "shot_interval": 2000,
+                "gun_type_text_color": (160,32,240),
                 "timer": Timer(2000)  # Add individual timer
-            }
+            },
+
         }
         self.gun = Gun(self.gun_data[str(self.gun_index)], self.gun_data[str(self.gun_index)]["shot_interval"], self, self.gun_data[str(self.gun_index)]["shot_speed"])
 
         
     def update(self, screen):
+        for i, spark in sorted(enumerate(self.sparks), reverse=True):
+            spark.move(1)
+            spark.draw(screen)
+            if not spark.alive:
+                self.sparks.pop(i)
+                
+        self.teleporter_timer.update()
+        #teleporter reload icon
+        # print("elapsed time: ", self.shot_timer.elapsed_time)
 
+        start_angle = math.radians(0)
+        # Calculate the proportion of time remaining (1.0 = full, 0.0 = empty)
+        time_remaining_ratio = (self.teleporter_timer.duration - self.teleporter_timer.elapsed_time) / max(1, self.teleporter_timer.duration)
+
+        # Convert to angle (360 degrees = full circle)
+        end_angle = math.radians(360 * time_remaining_ratio)
+        if end_angle != math.radians(360):
+            pygame.draw.arc(screen, (173, 216, 230), pygame.Rect(self.x-50, self.y,30,30), start_angle, end_angle, 5)
         self.gun.gun_type_data = self.gun_data[str(self.gun_index)]
         self.gun.gun_type_name = self.gun_data[str(self.gun_index)]["gun_type"]
         self.gun.shot_speed = self.gun_data[str(self.gun_index)]["shot_speed"]
