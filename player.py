@@ -89,7 +89,8 @@ class Player:
         
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
-            pygame.quit()
+            settings.running = False
+
         if keys[pygame.K_d] and self.x < settings.WINDOW_WIDTH-45:
             # settings.spacialGrid.moveClient(self.grid_id, self.x, self.y, self.x + self.speed*self.dt, self.y +self.speed*self.dt)
 
