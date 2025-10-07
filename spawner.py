@@ -252,10 +252,14 @@ class Spawner:
             self.current_enemy_image
         )
 
+        # Play boss theme if orbyprime is spawned
+        if self.enemy_type == "orbyprime":
+            pygame.mixer.music.load("./assets/sounds/bossthemeorbyprime.wav")
+            pygame.mixer.music.set_volume(0.2)
+            pygame.mixer.music.play(loops=-1)
+
         # settings.spacialGrid.addClient(enemy.grid_id, enemy.x, enemy.y)
-        
         # Pass shared resources to avoid reloading
         enemy.gun.shared_sounds = self._shared_sounds
         enemy.gun.shared_bullet_images = self._shared_bullet_images
-        
         self.enemies.append(enemy)
