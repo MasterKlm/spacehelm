@@ -103,17 +103,17 @@ def run_pygame():
         # Level([[Spawner(100, delta_time, player, 80), Spawner(200, delta_time, player, 200, "orby")]]),
 
 
-        # Level([[Spawner(5, delta_time, player, 100)]]),
-        # Level([[Spawner(10, delta_time, player, 80), Spawner(3, delta_time, player, 200, "orby")]]),
-        # Level([[Spawner(8, delta_time, player, 100, "orby"), Spawner(12, delta_time, player, 120)]]),
-        # Level([[Spawner(15, delta_time, player, 70), Spawner(5, delta_time, player, 500, "orby")]]),
-        # Level([[Spawner(20, delta_time, player, 60), Spawner(10, delta_time, player, 400, "orby")]]),
-        # Level([[Spawner(25, delta_time, player, 50), Spawner(15, delta_time, player, 350, "orby")]]),
-        # Level([[Spawner(30, delta_time, player, 45), Spawner(20, delta_time, player, 300, "orby")]]),
-        # Level([[Spawner(35, delta_time, player, 40), Spawner(25, delta_time, player, 250, "orby")]]),
-        # Level([[Spawner(40, delta_time, player, 35), Spawner(30, delta_time, player, 200, "orby")]]),
-        # Level([[Spawner(50, delta_time, player, 30), Spawner(40, delta_time, player, 150, "orby")]]),
-        # Level([[Spawner(1, delta_time, player, 100, "orbyprime")]]),
+        Level([[Spawner(5, delta_time, player, 100)]]),
+        Level([[Spawner(10, delta_time, player, 80), Spawner(3, delta_time, player, 200, "orby")]]),
+        Level([[Spawner(8, delta_time, player, 100, "orby"), Spawner(12, delta_time, player, 120)]]),
+        Level([[Spawner(15, delta_time, player, 70), Spawner(5, delta_time, player, 500, "orby")]]),
+        Level([[Spawner(20, delta_time, player, 60), Spawner(10, delta_time, player, 400, "orby")]]),
+        Level([[Spawner(25, delta_time, player, 50), Spawner(15, delta_time, player, 350, "orby")]]),
+        Level([[Spawner(30, delta_time, player, 45), Spawner(20, delta_time, player, 300, "orby")]]),
+        Level([[Spawner(35, delta_time, player, 40), Spawner(25, delta_time, player, 250, "orby")]]),
+        Level([[Spawner(40, delta_time, player, 35), Spawner(30, delta_time, player, 200, "orby")]]),
+        Level([[Spawner(50, delta_time, player, 30), Spawner(40, delta_time, player, 150, "orby")]]),
+        Level([[Spawner(1, delta_time, player, 100, "orbyprime")]]),
     ]
     
     level_index = 0
