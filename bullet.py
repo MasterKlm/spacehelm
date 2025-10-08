@@ -19,7 +19,7 @@ class Bullet:
         self.penetration = penetration
         self.hit_count = 0
         self.grid_id = random.randint(1,10**8)
-        # settings.spacialGrid.addClient(self.grid_id, start_x, start_y)
+        settings.spacialGrid.addClient(self.grid_id, self.x, self.y, self, "bullet")
 
 
         # Calculate direction vector
@@ -56,12 +56,15 @@ class Bullet:
         # Check if bullet is outside window bounds
         if ((self.x + self.bullet_image.get_width() if self.bullet_image != None else 0) > settings.WINDOW_WIDTH+100) or (self.x < 0) or (self.y < 0) or (self.y+self.bullet_image.get_height() if self.bullet_image != None else 0) > settings.WINDOW_HEIGHT+150:
             self.alive = False
+            settings.spacialGrid.removeClient(self.grid_id, self.x, self.y)
             
         if self.alive:
             # Move bullet in the calculated direction
-            # settings.spacialGrid.moveClient(self.grid_id, self.x, self.y, self.x + self.dir_x * self.speed * self.dt, self.y + self.dir_y * self.speed * self.dt)
-            self.x += self.dir_x * self.speed * self.dt
-            self.y += self.dir_y * self.speed * self.dt
+            new_x = self.x + self.dir_x * self.speed * self.dt
+            new_y = self.y + self.dir_y * self.speed * self.dt
+            settings.spacialGrid.moveClient(self.grid_id, self.x, self.y, new_x,new_y)
+            self.x = new_x
+            self.y = new_y
             self.render(screen)
     
     def render(self, screen):

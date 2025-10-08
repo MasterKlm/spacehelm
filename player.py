@@ -20,7 +20,7 @@ class Player:
         self.health = 100
         self.mask = pygame.mask.from_surface(self.image)
         self.gun_index = 1
-        # settings.spacialGrid.addClient(self.grid_id, x,y)
+        settings.spacialGrid.addClient(self.grid_id, x,y, self, "player")
         self.sparks = []
         self.teleporter_timer = Timer(3000) 
         self.gun_data = {
@@ -92,18 +92,21 @@ class Player:
             settings.running = False
 
         if keys[pygame.K_d] and self.x < settings.WINDOW_WIDTH-45:
-            # settings.spacialGrid.moveClient(self.grid_id, self.x, self.y, self.x + self.speed*self.dt, self.y +self.speed*self.dt)
-
-            self.x+=self.speed*self.dt
+            new_x = self.x + self.speed*self.dt
+            settings.spacialGrid.moveClient(self.grid_id, self.x, self.y,new_x, self.y)
+            self.x = new_x
         if keys[pygame.K_w] and self.y > settings.WINDOW_HEIGHT/2:
-            # settings.spacialGrid.moveClient(self.grid_id, self.x, self.y, self.x + self.speed*self.dt, self.y +self.speed*self.dt)
-            self.y-=self.speed*self.dt
+            new_y = self.y - self.speed*self.dt
+            settings.spacialGrid.moveClient(self.grid_id, self.x, self.y, self.x, new_y)
+            self.y = new_y
         if keys[pygame.K_s] and self.y < settings.WINDOW_HEIGHT-45:
-            # settings.spacialGrid.moveClient(self.grid_id, self.x, self.y, self.x + self.speed*self.dt, self.y +self.speed*self.dt)
-            self.y+=self.speed*self.dt
+            new_y = self.y + self.speed*self.dt
+            settings.spacialGrid.moveClient(self.grid_id, self.x, self.y, self.x,new_y)
+            self.y = new_y
         if keys[pygame.K_a] and self.x > 5:
-            # settings.spacialGrid.moveClient(self.grid_id, self.x, self.y, self.x + self.speed*self.dt, self.y +self.speed*self.dt)
-            self.x-=self.speed*self.dt
+            new_x = self.x - self.speed*self.dt
+            settings.spacialGrid.moveClient(self.grid_id, self.x, self.y,new_x, self.y)
+            self.x = new_x
         if keys[pygame.K_1]:
             self.gun_index = 1
         if keys[pygame.K_2]:

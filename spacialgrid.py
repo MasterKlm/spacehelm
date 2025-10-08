@@ -6,7 +6,7 @@ class SpatialGrid:
 
     def _getCellCoords(self, x, y):
         """Convert world coordinates into grid cell coordinates."""
-        return (x // self.cellSize, y // self.cellSize)
+        return (int(x) // self.cellSize, int(y) // self.cellSize)
 
     def addClient(self, obj_id, x, y, entity_ref=None, entity_type=None):
         """Add an object (by ID) to the grid based on its position."""
@@ -16,7 +16,7 @@ class SpatialGrid:
         self.grid[cell].add(obj_id)
         
         # Track entity for debugging/filtering
-        if entity_ref and entity_type:
+        if entity_ref is not None and entity_type is not None:
             self.entity_registry[obj_id] = (entity_ref, entity_type)
 
     def removeClient(self, obj_id, x, y):
@@ -47,8 +47,23 @@ class SpatialGrid:
         oldCell = self._getCellCoords(oldX, oldY)
         newCell = self._getCellCoords(newX, newY)
         if oldCell != newCell:
-            self.removeClient(obj_id, oldX, oldY)
-            self.addClient(obj_id, newX, newY)
+            # Store the registry info before removing
+            entity_info = self.entity_registry.get(obj_id, None)
+            
+            # Remove from old cell
+            if oldCell in self.grid and obj_id in self.grid[oldCell]:
+                self.grid[oldCell].remove(obj_id)
+                if not self.grid[oldCell]:
+                    del self.grid[oldCell]
+            
+            # Add to new cell
+            if newCell not in self.grid:
+                self.grid[newCell] = set()
+            self.grid[newCell].add(obj_id)
+            
+            # Restore registry info (don't delete it!)
+            if entity_info is not None:
+                self.entity_registry[obj_id] = entity_info
 
     def getNearby(self, x, y):
         """Return all objects in the cell and its 8 neighbors."""

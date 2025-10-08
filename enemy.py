@@ -33,7 +33,7 @@ class Enemy:
         self.health_bar_height = 6
         self.show_aura = enemy_type_data["enemy_aura"] if "enemy_aura" in enemy_type_data else False
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
-        # settings.spacialGrid.addClient(self.grid_id, start_x, start_y)
+        settings.spacialGrid.addClient(self.grid_id, self.x, self.y,self,"enemy")
 
     def show_health_bar(self):
         """Activate the health bar display when enemy is hit"""
@@ -70,10 +70,12 @@ class Enemy:
                 else:
                     norm_x = 1
                     norm_y = 0
-                # settings.spacialGrid.moveClient(self.grid_id, self.x, self.y, self.x + norm_x * move_speed, self.y + norm_y * move_speed)
                 
-                self.x += norm_x * move_speed
-                self.y += norm_y * move_speed
+                new_x = self.x + norm_x * move_speed
+                new_y = self.y + norm_y * move_speed
+                settings.spacialGrid.moveClient(self.grid_id, self.x, self.y, new_x,new_y)
+                self.x = new_x
+                self.y = new_y
         else:
             self.keep_moving = True
 

@@ -136,41 +136,45 @@ class Spawner:
             # Update enemy
             enemy.update(screen)
             
-            if not check_collisions:
-                continue
-                
+
             # Enemy bullets vs player - only check alive bullets
             alive_enemy_bullets = [b for b in enemy.gun.bullets if b.alive]
             for bullet in alive_enemy_bullets:
-                # Fast distance check first
-                dx = abs(bullet.x - (self.player.x + self.player.image.get_width()/2))
-                dy = abs(bullet.y - (self.player.y + self.player.image.get_height()/2))
-                
-                if dx < 60 and dy < 60:  # Tighter bounds for better performance
+                player_ids = settings.spacialGrid.getNearbyByType(bullet.x, bullet.y, "player")
+                # print("nearby players: ",player_ids)
+                for player_id in player_ids:
+                    player, _ = settings.spacialGrid.entity_registry[player_id]
+
                     # Use cached mask
-                    offset = (int(bullet.x - self.player.x), int(bullet.y - self.player.y))
-                    if self.player.mask.overlap(bullet.mask, offset):
-                        self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 3))
-                        self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 2))
-                        self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 4))
-                        self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 2))
-                        self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 3))
-                        self.player.health -= bullet.damage
-                        if self.player.health <= 0:
-                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 5))
-                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 2))
-                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 165, 0), 4))
-                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 8))
-                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 10))
-                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 4))
-                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 165, 0), 10))
-                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 10))
-                            self.sparks.append(Spark([self.player.x, self.player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 165, 0), 7))
+                    offset = (int(bullet.x -player.x), int(bullet.y -player.y))
+                    if player.mask.overlap(bullet.mask, offset):
+                        self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 3))
+                        self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 2))
+                        self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 4))
+                        self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 2))
+                        self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(20, 130)), random.randint(3, 6), (255, 0, 0), 3))
+                        player.health -= bullet.damage
+                        if player.health <= 0:
+                            self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 5))
+                            self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 2))
+                            self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 165, 0), 4))
+                            self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 8))
+                            self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 10))
+                            self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 4))
+                            self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 165, 0), 10))
+                            self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 0, 0), 10))
+                            self.sparks.append(Spark([self.player.x,player.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 165, 0), 7))
+                            settings.spacialGrid.removeClient(player.grid_id, player.x, player.y)
                         bullet.alive = False
+                        settings.spacialGrid.removeClient(bullet.grid_id, bullet.x, bullet.y)
             
             # Player bullets vs enemy - only check alive bullets
-            alive_player_bullets = [b for b in self.player.gun.bullets if b.alive]
-            for bullet in alive_player_bullets:
+        alive_player_bullets = [b for b in self.player.gun.bullets if b.alive]
+        for bullet in alive_player_bullets:
+            enemy_ids = settings.spacialGrid.getNearbyByType(bullet.x, bullet.y, "enemy")
+            # print("nearby enemies: ",enemy_ids)
+            for enemy_id in enemy_ids:
+                enemy, _ = settings.spacialGrid.entity_registry[enemy_id]
                 if bullet.gun_type_name == "rail":
                     if enemy.rect.colliderect(bullet.rect):  # Fast broad-phase
                         offset = (bullet.rect.x - enemy.rect.x, bullet.rect.y - enemy.rect.y)
@@ -183,6 +187,7 @@ class Spawner:
                         self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
                         enemy.show_health_bar()  # Show health bar when hit
                         bullet.alive = False
+                        settings.spacialGrid.removeClient(bullet.grid_id, bullet.x, bullet.y)
                         
                         if enemy.health <= 0:
                             self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
@@ -201,45 +206,49 @@ class Spawner:
                             self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
                             self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
                             enemy.alive = False
+                            settings.spacialGrid.removeClient(enemy.grid_id, enemy.x, enemy.y)
+                            
+
+                        
                         break  # Bullet hit, no need to check more bullets
                 else:
-                    dx = abs(bullet.x - enemy.x)
-                    dy = abs(bullet.y - enemy.y)
-                    if (dx < 200 if bullet.gun_type_name != "sweeper" else 200 ) and ( dy < 35 if bullet.gun_type_name != "sweeper" else 200):  # Tighter bounds
-                        # Use cached mask
-                        offset = (int(bullet.x - enemy.x), int(bullet.y - enemy.y))
-                        enemy_mask = self.enemy_masks[self.enemy_type]
-                        if enemy_mask.overlap(bullet.mask, offset):
-                            enemy.health -= bullet.damage
-                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
-                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
-                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
-                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
-                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
-                            enemy.show_health_bar()  # Show health bar when hit
-                            if bullet.penetration == 0 or bullet.hit_count == bullet.penetration:
-                                bullet.alive = False
-                            else:
-                                bullet.hit_count+=1
 
-                            if enemy.health <= 0:
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
-                                enemy.alive = False
-                            break  # Bullet hit, no need to check more bullets
+                    offset = (int(bullet.x - enemy.x), int(bullet.y - enemy.y))
+                    enemy_mask = self.enemy_masks[self.enemy_type]
+                    if enemy_mask.overlap(bullet.mask, offset):
+                        enemy.health -= bullet.damage
+                        self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
+                        self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
+                        self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
+                        self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
+                        self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), (255, 255, 255), 3))
+                        enemy.show_health_bar()  # Show health bar when hit
+                        if bullet.penetration == 0 or bullet.hit_count == bullet.penetration:
+                            bullet.alive = False
+                            settings.spacialGrid.removeClient(bullet.grid_id, bullet.x, bullet.y)
+                        else:
+                            bullet.hit_count+=1
+
+                        if enemy.health <= 0:
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            self.sparks.append(Spark([enemy.x, enemy.y], math.radians(random.randint(0, 360)), random.randint(3, 6), enemy.image_average_color, 2))
+                            enemy.alive = False
+                            settings.spacialGrid.removeClient(enemy.grid_id, enemy.x, enemy.y)
+
+                        break  # Bullet hit, no need to check more bullets
         
     def spawn(self, screen):
         endX = random.randint(10, WINDOW_WIDTH-10)
