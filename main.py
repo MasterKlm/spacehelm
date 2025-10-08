@@ -230,7 +230,7 @@ def run_pygame():
         screen.blit(gun_index_text, ((settings.WINDOW_WIDTH/2) - 30, settings.WINDOW_HEIGHT - 80))
         
         # Game over check
-        if player.health < 0:
+        if player.health <= 0:
             game_over_font = pygame.font.Font("./assets/fonts/PixelifySans-Regular.ttf", 60)
             game_over_text = game_over_font.render("Game Over", True, (255, 0, 0))
             
